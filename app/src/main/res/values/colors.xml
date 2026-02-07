@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Keep your existing colors, and add these: -->
+
+    <color name="background">#F5F5F5</color>
+    <color name="cardBackground">#FFFFFF</color>
+    <color name="textPrimary">#212121</color>
+    <color name="textSecondary">#757575</color>
+
+    <!-- If you don't have these already, add them too: -->
+    <color name="primary">#FF6B35</color>
+    <color name="primaryDark">#E55A2B</color>
+    <color name="accent">#4CAF50</color>
+    <color name="green">#4CAF50</color>
+    <color name="red">#F44336</color>
+    <color name="orange">#FF9800</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>
