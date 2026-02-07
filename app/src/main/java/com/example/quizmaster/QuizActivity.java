@@ -3,33 +3,46 @@ package com.example.quizmaster;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
+import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.*;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class QuizActivity extends AppCompatActivity {
+
     private QuizManager quizManager;
     private UserManager userManager;
+    private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
+
     private List<Question> questions;
-    private List<QuizResult> quizResults; // Store all answers
+    private List<QuizResult> quizResults = new ArrayList<>();
+
     private int currentQuestionIndex = 0;
     private int score = 0;
     private CountDownTimer timer;
-    private String difficulty;
-    private String categoryName;
+
+    private String difficulty, categoryName;
 
     private TextView tvQuestion, tvQuestionNumber, tvTimer, tvDifficulty;
     private ProgressBar progressBar;
     private LinearLayout llOptions;
+
     private boolean answerSelected = false;
-    private int selectedOptionIndex = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +51,9 @@ public class QuizActivity extends AppCompatActivity {
 
         quizManager = new QuizManager(this);
         userManager = new UserManager(this);
-        quizResults = new ArrayList<>();
+
+        mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         categoryName = getIntent().getStringExtra("CATEGORY_NAME");
         String categoryId = getIntent().getStringExtra("CATEGORY_ID");
@@ -49,23 +64,23 @@ public class QuizActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        initializeViews();
+        initViews();
 
         questions = quizManager.getQuestionsByCategory(categoryId, difficulty);
 
         if (questions.isEmpty()) {
-            Toast.makeText(this, "No questions available for this difficulty", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No questions available", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
         tvDifficulty.setText(capitalize(difficulty));
-        setDifficultyColor(difficulty);
+        setDifficultyColor();
 
         displayQuestion();
     }
 
-    private void initializeViews() {
+    private void initViews() {
         tvQuestion = findViewById(R.id.tvQuestion);
         tvQuestionNumber = findViewById(R.id.tvQuestionNumber);
         tvTimer = findViewById(R.id.tvTimer);
@@ -74,27 +89,19 @@ public class QuizActivity extends AppCompatActivity {
         llOptions = findViewById(R.id.llOptions);
     }
 
-    private void setDifficultyColor(String diff) {
+    private void setDifficultyColor() {
         int color;
-        switch (diff.toLowerCase()) {
+        switch (difficulty.toLowerCase()) {
             case "easy":
                 color = ContextCompat.getColor(this, R.color.green);
                 break;
             case "medium":
                 color = ContextCompat.getColor(this, R.color.orange);
                 break;
-            case "hard":
-                color = ContextCompat.getColor(this, R.color.red);
-                break;
             default:
-                color = ContextCompat.getColor(this, R.color.textSecondary);
+                color = ContextCompat.getColor(this, R.color.red);
         }
         tvDifficulty.setTextColor(color);
-    }
-
-    private String capitalize(String str) {
-        if (str == null || str.isEmpty()) return str;
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
     private void displayQuestion() {
@@ -103,8 +110,8 @@ public class QuizActivity extends AppCompatActivity {
             return;
         }
 
-        answerSelected = false; // Reset flag for new question
-        selectedOptionIndex = -1; // Reset selected option
+        answerSelected = false;
+        llOptions.removeAllViews();
 
         Question question = questions.get(currentQuestionIndex);
 
@@ -112,190 +119,141 @@ public class QuizActivity extends AppCompatActivity {
         tvQuestion.setText(question.getQuestion());
         progressBar.setProgress(((currentQuestionIndex + 1) * 100) / questions.size());
 
-        llOptions.removeAllViews();
-        List<String> options = question.getOptions();
-
-        for (int i = 0; i < options.size(); i++) {
-            final int optionIndex = i;
-
-            // Create a CardView for each option
-            androidx.cardview.widget.CardView cardView = new androidx.cardview.widget.CardView(this);
-            LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            cardParams.setMargins(0, 0, 0, 24); // Bottom margin between boxes
-            cardView.setLayoutParams(cardParams);
-            cardView.setCardElevation(4);
-            cardView.setRadius(12);
-            cardView.setCardBackgroundColor(0xFFFFFFFF);
-
-            // Create TextView for option text
-            TextView optionText = new TextView(this);
-            optionText.setText(options.get(i));
-            optionText.setTextSize(18);
-            optionText.setTextColor(0xFF212121);
-            optionText.setPadding(32, 48, 32, 48); // Big padding for large boxes
-            optionText.setGravity(android.view.Gravity.CENTER);
-
-            cardView.addView(optionText);
-
-            // Set click listener
-            cardView.setOnClickListener(v -> {
-                if (!answerSelected) {
-                    answerSelected = true;
-                    selectedOptionIndex = optionIndex;
-
-                    // Highlight selected option
-                    cardView.setCardBackgroundColor(0xFFFF6B35);
-                    optionText.setTextColor(0xFFFFFFFF);
-
-                    // Submit answer after a short delay
-                    llOptions.postDelayed(() -> checkAnswer(), 100);
-                }
-            });
-
-            llOptions.addView(cardView);
+        for (int i = 0; i < question.getOptions().size(); i++) {
+            addOption(question, i);
         }
 
         startTimer();
     }
 
+    private void addOption(Question question, int index) {
+        CardView card = new CardView(this);
+        card.setRadius(12);
+        card.setCardElevation(6);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 0, 0, 24);
+        card.setLayoutParams(params);
+
+        TextView tv = new TextView(this);
+        tv.setText(question.getOptions().get(index));
+        tv.setTextSize(18);
+        tv.setPadding(32, 48, 32, 48);
+        tv.setGravity(Gravity.CENTER);
+
+        card.addView(tv);
+
+        card.setOnClickListener(v -> {
+            if (answerSelected) return;
+
+            answerSelected = true;
+            stopTimer();
+
+            boolean correct = index == question.getCorrectAnswer();
+            checkAnswer(question, index, correct);
+        });
+
+        llOptions.addView(card);
+    }
+
     private void startTimer() {
-        if (timer != null) {
-            timer.cancel();
-        }
-
         timer = new CountDownTimer(15000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                int timeLeft = (int) (millisUntilFinished / 1000);
-                tvTimer.setText(timeLeft + " s");
-
-                if (timeLeft <= 5) {
-                    tvTimer.setTextColor(ContextCompat.getColor(QuizActivity.this, R.color.red));
-                } else {
-                    tvTimer.setTextColor(ContextCompat.getColor(QuizActivity.this, R.color.green));
-                }
+            public void onTick(long ms) {
+                int sec = (int) (ms / 1000);
+                tvTimer.setText(sec + " s");
             }
 
-            @Override
             public void onFinish() {
                 Toast.makeText(QuizActivity.this, "Time's up!", Toast.LENGTH_SHORT).show();
-
-                // Save as incorrect with no answer
-                Question question = questions.get(currentQuestionIndex);
-                QuizResult result = new QuizResult(
-                        question.getQuestion(),
-                        "No answer",
-                        question.getOptions().get(question.getCorrectAnswer()),
-                        false
-                );
-                quizResults.add(result);
-
                 currentQuestionIndex++;
                 displayQuestion();
             }
         }.start();
     }
 
-    private void checkAnswer() {
-        if (timer != null) {
-            timer.cancel();
-        }
+    private void stopTimer() {
+        if (timer != null) timer.cancel();
+    }
 
-        if (selectedOptionIndex == -1) {
-            // This shouldn't happen with automatic selection, but handle it gracefully
-            return;
-        }
+    private void checkAnswer(Question q, int selected, boolean correct) {
+        String userAns = q.getOptions().get(selected);
+        String correctAns = q.getOptions().get(q.getCorrectAnswer());
 
-        Question question = questions.get(currentQuestionIndex);
-        String userAnswer = question.getOptions().get(selectedOptionIndex);
-        String correctAnswer = question.getOptions().get(question.getCorrectAnswer());
-        boolean isCorrect = selectedOptionIndex == question.getCorrectAnswer();
+        quizResults.add(new QuizResult(q.getQuestion(), userAns, correctAns, correct));
 
-        // Save result
-        QuizResult result = new QuizResult(
-                question.getQuestion(),
-                userAnswer,
-                correctAnswer,
-                isCorrect
-        );
-        quizResults.add(result);
-
-        if (isCorrect) {
-            int points = getPointsForDifficulty(difficulty);
+        if (correct) {
+            int points = getPoints();
             score += points;
-            Toast.makeText(this, "✓ Correct! +" + points + " points", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Correct! +" + points, Toast.LENGTH_SHORT).show();
         } else {
-            // DON'T show correct answer - just say wrong
-            Toast.makeText(this, "✗ Wrong answer", Toast.LENGTH_SHORT).show();
-        }
-
-        currentQuestionIndex++;
-
-        // Disable further selections while transitioning
-        llOptions.setEnabled(false);
-        for (int i = 0; i < llOptions.getChildCount(); i++) {
-            llOptions.getChildAt(i).setEnabled(false);
+            Toast.makeText(this, "Wrong!", Toast.LENGTH_SHORT).show();
         }
 
         llOptions.postDelayed(() -> {
-            llOptions.setEnabled(true);
+            currentQuestionIndex++;
             displayQuestion();
-        }, 400);
+        }, 500);
     }
 
-    private int getPointsForDifficulty(String diff) {
-        switch (diff.toLowerCase()) {
+    private int getPoints() {
+        switch (difficulty.toLowerCase()) {
             case "easy": return 5;
             case "medium": return 10;
-            case "hard": return 15;
-            default: return 10;
+            default: return 15;
         }
     }
 
     private void showResults() {
-        if (timer != null) {
-            timer.cancel();
-        }
-
-        User user = userManager.getCurrentUser();
-        if (user != null) {
-            user.setPoints(user.getPoints() + score);
-            user.setLevel((user.getPoints() / 100) + 1);
-            userManager.saveUser(user);
-        }
-
-        QuizHistory quizHistory = new QuizHistory(
-                categoryName != null ? categoryName : "Quiz",
-                difficulty,
-                score,
-                questions.size(),
-                System.currentTimeMillis()
-        );
-        userManager.saveQuizHistory(quizHistory);
+        stopTimer();
+        saveProgress();
 
         Intent intent = new Intent(this, ResultActivity.class);
         intent.putExtra("SCORE", score);
         intent.putExtra("TOTAL_QUESTIONS", questions.size());
         intent.putExtra("DIFFICULTY", difficulty);
+        intent.putExtra("CATEGORY_NAME", categoryName);
         intent.putParcelableArrayListExtra("QUIZ_RESULTS", new ArrayList<>(quizResults));
         startActivity(intent);
         finish();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (timer != null) {
-            timer.cancel();
+    private void saveProgress() {
+        User user = userManager.getCurrentUser();
+        if (user != null) {
+            user.addPoints(score);
+            userManager.saveUser(user);
         }
+
+        // FIX: Only proceed with Firebase operations if both Firebase user and local user exist
+        if (mAuth.getCurrentUser() == null || user == null) return;
+
+        String userId = mAuth.getCurrentUser().getUid();
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("points", user.getPoints());
+        updates.put("level", user.getLevel());
+
+        mDatabase.child("users").child(userId).updateChildren(updates);
+
+        QuizHistory history = new QuizHistory(
+                categoryName, difficulty, score,
+                questions.size(), System.currentTimeMillis()
+        );
+
+        mDatabase.child("quiz_history").child(userId)
+                .push().setValue(history);
+    }
+
+    private String capitalize(String s) {
+        return s.substring(0,1).toUpperCase() + s.substring(1);
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
+    protected void onDestroy() {
+        super.onDestroy();
+        stopTimer();
     }
 }

@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.quizmaster">
 
+    <!-- Required permissions for Firebase and network access -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -11,13 +15,17 @@
         android:theme="@style/Theme.QuizMaster">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
 
         <activity
             android:name=".RegisterActivity"
@@ -33,11 +41,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".LeaderboardActivity"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" />
-
-        <activity
             android:name=".ProfileActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
@@ -46,6 +49,7 @@
             android:name=".HistoryActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
+
         <activity
             android:name=".ReviewAnswersActivity"
             android:exported="false"

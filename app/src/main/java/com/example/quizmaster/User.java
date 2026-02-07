@@ -11,12 +11,26 @@ public class User {
     private int streak;
     private List<String> badges;
 
+    // Default constructor required for Firebase
+    public User() {
+    }
+
     // Constructor
     public User(String username, String email) {
         this.username = username;
         this.email = email;
         this.level = 1;
         this.points = 0;
+        this.streak = 0;
+        this.badges = new ArrayList<>();
+    }
+
+    // Constructor with points and level
+    public User(String username, String email, int points, int level) {
+        this.username = username;
+        this.email = email;
+        this.points = points;
+        this.level = level;
         this.streak = 0;
         this.badges = new ArrayList<>();
     }
@@ -73,6 +87,9 @@ public class User {
 
     // Helper method to add a badge
     public void addBadge(String badge) {
+        if (badges == null) {
+            badges = new ArrayList<>();
+        }
         if (!badges.contains(badge)) {
             badges.add(badge);
         }
