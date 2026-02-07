@@ -373,6 +373,76 @@ public class QuizManager {
                 Arrays.asList("60", "70", "80", "90"), 2, "sports", "hard"));
         allQuestions.add(new Question("Which Formula 1 driver has the most world championships?",
                 Arrays.asList("Ayrton Senna", "Sebastian Vettel", "Lewis Hamilton", "Michael Schumacher"), 3, "sports", "hard"));
+
+        // ========================================
+        // GEOGRAPHY QUESTIONS
+        // ========================================
+
+        // EASY (10 questions)
+        allQuestions.add(new Question("What is the capital of France?",
+                Arrays.asList("London", "Berlin", "Paris", "Madrid"), 2, "geography", "easy"));
+        allQuestions.add(new Question("Which ocean is the largest?",
+                Arrays.asList("Atlantic", "Indian", "Arctic", "Pacific"), 3, "geography", "easy"));
+        allQuestions.add(new Question("What is the smallest continent?",
+                Arrays.asList("Africa", "Australia", "Europe", "Antarctica"), 1, "geography", "easy"));
+        allQuestions.add(new Question("Which country is famous for the pyramids?",
+                Arrays.asList("India", "Egypt", "Mexico", "Peru"), 1, "geography", "easy"));
+        allQuestions.add(new Question("What is the capital of Japan?",
+                Arrays.asList("Seoul", "Beijing", "Tokyo", "Bangkok"), 2, "geography", "easy"));
+        allQuestions.add(new Question("Which continent is the Sahara Desert in?",
+                Arrays.asList("Asia", "Africa", "Australia", "South America"), 1, "geography", "easy"));
+        allQuestions.add(new Question("What is the longest river in the world?",
+                Arrays.asList("Amazon", "Nile", "Yangtze", "Mississippi"), 1, "geography", "easy"));
+        allQuestions.add(new Question("Which country has the most population?",
+                Arrays.asList("USA", "India", "China", "Russia"), 2, "geography", "easy"));
+        allQuestions.add(new Question("What is the capital of the USA?",
+                Arrays.asList("New York", "Los Angeles", "Chicago", "Washington D.C."), 3, "geography", "easy"));
+        allQuestions.add(new Question("Which country is home to the kangaroo?",
+                Arrays.asList("New Zealand", "Australia", "South Africa", "Brazil"), 1, "geography", "easy"));
+
+        // MEDIUM (10 questions)
+        allQuestions.add(new Question("What is the capital of Canada?",
+                Arrays.asList("Toronto", "Vancouver", "Ottawa", "Montreal"), 2, "geography", "medium"));
+        allQuestions.add(new Question("Which river runs through Egypt?",
+                Arrays.asList("Amazon", "Nile", "Thames", "Ganges"), 1, "geography", "medium"));
+        allQuestions.add(new Question("What is the largest country by area?",
+                Arrays.asList("Canada", "USA", "China", "Russia"), 3, "geography", "medium"));
+        allQuestions.add(new Question("Which mountain range separates Europe and Asia?",
+                Arrays.asList("Alps", "Himalayas", "Ural", "Andes"), 2, "geography", "medium"));
+        allQuestions.add(new Question("What is the capital of Australia?",
+                Arrays.asList("Sydney", "Melbourne", "Canberra", "Perth"), 2, "geography", "medium"));
+        allQuestions.add(new Question("Which sea is the saltiest?",
+                Arrays.asList("Red Sea", "Dead Sea", "Black Sea", "Caspian Sea"), 1, "geography", "medium"));
+        allQuestions.add(new Question("What is the largest island in the world?",
+                Arrays.asList("Madagascar", "Greenland", "Borneo", "New Guinea"), 1, "geography", "medium"));
+        allQuestions.add(new Question("Which country has the most natural lakes?",
+                Arrays.asList("USA", "Russia", "Canada", "Finland"), 2, "geography", "medium"));
+        allQuestions.add(new Question("What is the capital of Spain?",
+                Arrays.asList("Barcelona", "Madrid", "Valencia", "Seville"), 1, "geography", "medium"));
+        allQuestions.add(new Question("Which continent has no desert?",
+                Arrays.asList("Africa", "Asia", "Europe", "Australia"), 2, "geography", "medium"));
+
+        // HARD (10 questions)
+        allQuestions.add(new Question("What is the capital of Kazakhstan?",
+                Arrays.asList("Almaty", "Astana", "Bishkek", "Tashkent"), 1, "geography", "hard"));
+        allQuestions.add(new Question("Which country has the most time zones?",
+                Arrays.asList("Russia", "USA", "France", "China"), 2, "geography", "hard"));
+        allQuestions.add(new Question("What is the deepest point in the ocean?",
+                Arrays.asList("Puerto Rico Trench", "Java Trench", "Mariana Trench", "Philippine Trench"), 2, "geography", "hard"));
+        allQuestions.add(new Question("Which African country was never colonized?",
+                Arrays.asList("Kenya", "Ethiopia", "Nigeria", "Ghana"), 1, "geography", "hard"));
+        allQuestions.add(new Question("What is the smallest country in the world?",
+                Arrays.asList("Monaco", "Vatican City", "San Marino", "Liechtenstein"), 1, "geography", "hard"));
+        allQuestions.add(new Question("Which desert is the driest in the world?",
+                Arrays.asList("Sahara", "Gobi", "Atacama", "Kalahari"), 2, "geography", "hard"));
+        allQuestions.add(new Question("What is the capital of Mongolia?",
+                Arrays.asList("Ulaanbaatar", "Astana", "Bishkek", "Tashkent"), 0, "geography", "hard"));
+        allQuestions.add(new Question("Which country is made up of 7,641 islands?",
+                Arrays.asList("Indonesia", "Japan", "Philippines", "Maldives"), 2, "geography", "hard"));
+        allQuestions.add(new Question("What is the longest mountain range in the world?",
+                Arrays.asList("Himalayas", "Andes", "Rockies", "Alps"), 1, "geography", "hard"));
+        allQuestions.add(new Question("Which two countries share the longest border?",
+                Arrays.asList("USA-Mexico", "Russia-China", "Canada-USA", "Brazil-Argentina"), 2, "geography", "hard"));
     }
 
     // ========================================

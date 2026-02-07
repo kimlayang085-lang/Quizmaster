@@ -8,6 +8,12 @@ public class QuizHistory {
     private long timestamp;
     private int percentage;
 
+    // ✅ REQUIRED: No-argument constructor for Firebase
+    public QuizHistory() {
+        // Firebase needs this empty constructor
+    }
+
+    // Regular constructor
     public QuizHistory(String categoryName, String difficulty, int score, int totalQuestions, long timestamp) {
         this.categoryName = categoryName;
         this.difficulty = difficulty;
@@ -44,4 +50,29 @@ public class QuizHistory {
     public int getTotalQuestions() { return totalQuestions; }
     public long getTimestamp() { return timestamp; }
     public int getPercentage() { return percentage; }
+
+    // ✅ REQUIRED: Setters for Firebase
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void setTotalQuestions(int totalQuestions) {
+        this.totalQuestions = totalQuestions;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setPercentage(int percentage) {
+        this.percentage = percentage;
+    }
 }

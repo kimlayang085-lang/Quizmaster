@@ -166,12 +166,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupCategories() {
         List<Category> categories = new ArrayList<>();
-        categories.add(new Category("General Knowledge", "general", R.drawable.ic_general, 0));
-        categories.add(new Category("Science", "science", R.drawable.ic_science, 0));
-        categories.add(new Category("History", "history", R.drawable.ic_history, 0));
-        categories.add(new Category("Geography", "geography", R.drawable.ic_geography, 0));
-        categories.add(new Category("Sports", "sports", R.drawable.ic_sports, 0));
-        categories.add(new Category("Entertainment", "entertainment", R.drawable.ic_entertainment, 0));
+
+        // Count questions for each category
+        int generalCount = countQuestionsForCategory("general");
+        int scienceCount = countQuestionsForCategory("science");
+        int historyCount = countQuestionsForCategory("history");
+        int geographyCount = countQuestionsForCategory("geography");
+        int sportsCount = countQuestionsForCategory("sports");
+        int techCount = countQuestionsForCategory("technology");
+
+        // Add categories with actual quiz counts
+        categories.add(new Category("General Knowledge", "general", R.drawable.ic_general, generalCount));
+        categories.add(new Category("Science", "science", R.drawable.ic_science, scienceCount));
+        categories.add(new Category("History", "history", R.drawable.ic_history, historyCount));
+        categories.add(new Category("Geography", "geography", R.drawable.ic_geography, geographyCount));
+        categories.add(new Category("Sports", "sports", R.drawable.ic_sports, sportsCount));
+        categories.add(new Category("Technology", "technology", R.drawable.ic_tech, techCount));
 
         CategoryAdapter adapter = new CategoryAdapter(categories, category -> {
             showDifficultyDialog(category.getId(), category.getName());
@@ -179,6 +189,20 @@ public class MainActivity extends AppCompatActivity {
 
         rvCategories.setLayoutManager(new GridLayoutManager(this, 2));
         rvCategories.setAdapter(adapter);
+    }
+
+    // Helper method to count questions for a category
+    private int countQuestionsForCategory(String categoryId) {
+        List<Question> allQuestions = quizManager.getAllQuestions();
+        int count = 0;
+
+        for (Question q : allQuestions) {
+            if (q.getCategory().equals(categoryId)) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     private void showDifficultyDialog(String categoryId, String categoryName) {

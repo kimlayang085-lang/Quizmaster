@@ -221,30 +221,37 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void saveProgress() {
+        // Create quiz history object
+        QuizHistory history = new QuizHistory(
+                categoryName, difficulty, score,
+                questions.size(), System.currentTimeMillis()
+        );
+
+        // FIXED: Save history to local storage first (immediately available)
+        userManager.saveQuizHistory(history);
+
+        // Update user points locally
         User user = userManager.getCurrentUser();
         if (user != null) {
             user.addPoints(score);
             userManager.saveUser(user);
         }
 
-        // FIX: Only proceed with Firebase operations if both Firebase user and local user exist
-        if (mAuth.getCurrentUser() == null || user == null) return;
+        // FIXED: Only save to Firebase if user is authenticated
+        if (mAuth.getCurrentUser() != null && user != null) {
+            String userId = mAuth.getCurrentUser().getUid();
 
-        String userId = mAuth.getCurrentUser().getUid();
+            // Save user points and level to Firebase
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("points", user.getPoints());
+            updates.put("level", user.getLevel());
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("points", user.getPoints());
-        updates.put("level", user.getLevel());
+            mDatabase.child("users").child(userId).updateChildren(updates);
 
-        mDatabase.child("users").child(userId).updateChildren(updates);
-
-        QuizHistory history = new QuizHistory(
-                categoryName, difficulty, score,
-                questions.size(), System.currentTimeMillis()
-        );
-
-        mDatabase.child("quiz_history").child(userId)
-                .push().setValue(history);
+            // Save quiz history to Firebase
+            mDatabase.child("quiz_history").child(userId)
+                    .push().setValue(history);
+        }
     }
 
     private String capitalize(String s) {
